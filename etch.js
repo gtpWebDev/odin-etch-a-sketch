@@ -1,21 +1,21 @@
 
 
-/*
 
-for a given number, e.g. 3
-we'll need to create the full 3x3 grid
-
-repeat 3 times:
-add a horizontal flexbox div:
-  - add 3 divs
-
-
-*/
 
 const maxGridSize = 75
+const etchFullWidthInPx = 500
 
-let gridSize = collectGridSizeFromUser()
-createEtchGrid(gridSize)  
+let gridSizeButton = document.querySelector("#gridSizeButton")
+gridSizeButton.addEventListener("click",generateEtchASketch)
+
+// Need to deal with OK and cancel from prompt
+
+function generateEtchASketch() {
+  let gridSizeResponse = collectGridSizeFromUser()
+  if (gridSizeResponse.generateGrid) {
+    createEtchGrid(gridSizeResponse.gridSize)  
+  }
+}
 
 function collectGridSizeFromUser() {
 
@@ -23,8 +23,14 @@ function collectGridSizeFromUser() {
 
   while (!validInput) {
     let gridSizeInput = prompt("Please enter a grid size less than 75.")
-    if (Number.isInteger(parseInt(gridSizeInput)) && parseInt(gridSizeInput) <= maxGridSize) {
-      return parseInt(gridSizeInput)
+    if (gridSizeInput === null) { // prompt is cancelled
+      return {generateGrid: false, gridSize: null}
+    }
+    if (Number.isInteger(parseInt(gridSizeInput)) &&
+        parseInt(gridSizeInput) <= maxGridSize &&
+        parseInt(gridSizeInput) > 0
+    ) {
+      return {generateGrid: true, gridSize: parseInt(gridSizeInput)}
     }
   }
 
@@ -32,7 +38,11 @@ function collectGridSizeFromUser() {
 
 function createEtchGrid(gridSize) {
 
-  let gridArea = document.querySelector("#gridArea")
+  removeOldGrid()
+
+  let gridContainer = document.querySelector(".gridContainer")
+  let gridArea = document.createElement("div")
+  gridContainer.appendChild(gridArea)
 
   for (let i=0; i<gridSize; i++) {
 
@@ -41,11 +51,13 @@ function createEtchGrid(gridSize) {
 
     for (let j=0; j<gridSize; j++) {
       let cellDiv = document.createElement("div")
-      cellDiv.setAttribute("class","etchCell")
 
       cellDiv.addEventListener("mouseenter",() => {
-        cellDiv.setAttribute("style","background-color:black")
+        cellDiv.setAttribute("class","blackCell")
       })
+
+      let edgeLength = etchFullWidthInPx / gridSize
+      cellDiv.setAttribute("style",`width:${edgeLength}px; height:${edgeLength}px`)
 
       rowDiv.appendChild(cellDiv)
     }
@@ -53,3 +65,14 @@ function createEtchGrid(gridSize) {
   }
 
 }
+
+function removeOldGrid() {
+
+  let gridContainer = document.querySelector(".gridContainer")
+  while (gridContainer.firstChild) {
+  gridContainer.removeChild(gridContainer.firstChild);
+}
+
+}
+
+
